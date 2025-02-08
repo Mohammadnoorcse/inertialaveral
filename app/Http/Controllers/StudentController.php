@@ -2,26 +2,59 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use Inertia\Inertia;
 use App\Models\Student;
 use Illuminate\Http\Request;
+use App\Models\StudentProfile;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Inertia\Inertia;
 
 class StudentController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    // public function index()
+    // {
+    //     $students = Student::paginate(2);
+    //     return Inertia::render('Student', [
+    //         'students' => $students,
+    //         'flash' => session('success')
+    //     ]);
+    // }
+
+    public function index(Request $request)
     {
-        $students = Student::all();
+
+        $search = $request->search ? $request->search : '';
+
+        $students = Student::with(['profile','createdBy:id,name'])
+            ->where('name', 'like', '%' . $request->search . '%')
+            ->orWhere('class', 'like', '%' . $request->search . '%')
+            ->orWhere('section', 'like', '%' . $request->search . '%')
+            ->orWhere('contact', 'like', '%' . $request->search . '%')
+            ->orWhere('address', 'like', '%' . $request->search . '%')
+            ->paginate(2)->appends(['search' => $search]);
+
+        // if ($request->has('search') && !empty($request->search)) {
+            // $query->where('name', 'like', '%' . $request->search . '%')
+            //     ->orWhere('class', 'like', '%' . $request->search . '%')
+            //     ->orWhere('section', 'like', '%' . $request->search . '%')
+            //     ->orWhere('contact', 'like', '%' . $request->search . '%')
+            //     ->orWhere('address', 'like', '%' . $request->search . '%');
+        // }
+
+        // $students = $query->paginate(2)->appends(['search' => $request->search]);
+
         return Inertia::render('Student', [
             'students' => $students,
-            'flash' => session('success')
+            'flash' => session('success'),
+            'searchQuery' => $request->search
         ]);
     }
 
-    
+
 
     /**
      * Show the form for creating a new resource.
@@ -36,7 +69,9 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-        $validation = Validator::make($request->all(), [
+
+
+        Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'class' => 'required|string|max:50',
             'section' => 'required|string|max:50',
@@ -44,21 +79,38 @@ class StudentController extends Controller
             'address' => 'required|string|max:500'
         ]);
 
-        if ($validation->fails()) {
-            return back()->withErrors($validation->errors())->withInput();
-        }
+        // if ($validation->fails()) {
+        //     return back()->withErrors($validation->errors())->withInput();
+        // }
 
         // Store the student data
-        $student = Student::create([
+
+        $data = [
             'name' => $request->name,
             'class' => $request->class,
             'section' => $request->section,
             'contact' => $request->contact,
-            'address' => $request->address
+            'address' => $request->address,
+            'created_by' => Auth::user()->id
+        ];
+
+        $student = Student::create($data);
+
+        $student->profile()->create([
+            'student_id' => $student->id,
+            'name' => 'roton exaple'
         ]);
 
-        return redirect()->route('student.index')->with('success', 'Student created successfully');
+        // StudentProfile::create([
+        //     'student_id' => $student->id,
+        //     'name' => 'roton exaple'
+        // ]);
+
+
+        // return redirect()->route('student.index')->with('success', 'Student created successfully');
+        return response()->json(['success' =>  $student->id]);
     }
+
 
     /**
      * Display the specified resource.
@@ -111,37 +163,9 @@ class StudentController extends Controller
         if (!$student) {
             return back()->withErrors(['message' => 'Student not found']);
         }
-
         $student->delete();
-
         return redirect()->route('student.index')->with('success', 'Student deleted successfully');
     }
 }
 
 
-
-// public function searching(Request $request)
-//     {
-//         $query = Student::query();
-
-//         if ($request->has('search')) {
-//             $search = $request->search;
-//             $query->where('name', 'like', "%$search%")
-//                 ->orWhere('class', 'like', "%$search%")
-//                 ->orWhere('section', 'like', "%$search%")
-//                 ->orWhere('contact', 'like', "%$search%")
-//                 ->orWhere('address', 'like', "%$search%");
-//         }
-
-//         $students = $query->get();
-
-//         return Inertia::render('Student', [
-//             'students' => $students,
-//             'flash' => session('success'),
-//             'search' => $request->search // Keep track of search term
-//         ]);
-//     }
-
-
-
-    

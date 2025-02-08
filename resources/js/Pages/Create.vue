@@ -12,7 +12,8 @@ const form = useForm({
 });
 
 function submit() {
-    router.post("/create", form);
+    // router.post("/create", form);
+    form.post("/student");
 }
 </script>
 
@@ -32,7 +33,7 @@ function submit() {
                             placeholder="Enter the Name"
                             class="w-full h-[2rem] rounded-md text-sm"
                         />
-                        <!-- <InputError class="mt-2" :message="router.errors.name" /> -->
+                        <InputError class="mt-2" :message="form.errors.name" />
                     </div>
                     <div class="flex flex-col">
                         <span>class</span>
@@ -42,6 +43,7 @@ function submit() {
                             placeholder="Enter the class"
                             class="w-full h-[2rem] rounded-md text-sm"
                         />
+                        <InputError class="mt-2" :message="form.errors.class" />
                     </div>
                     <div class="flex flex-col">
                         <span>section</span>
@@ -51,6 +53,7 @@ function submit() {
                             placeholder="Enter the section"
                             class="w-full h-[2rem] rounded-md text-sm"
                         />
+                        <InputError class="mt-2" :message="form.errors.section" />
                     </div>
                     <div class="flex flex-col">
                         <span>contact</span>
@@ -60,6 +63,7 @@ function submit() {
                             placeholder="Enter the contact"
                             class="w-full h-[2rem] rounded-md text-sm"
                         />
+                        <InputError class="mt-2" :message="form.errors.contact" />
                     </div>
                     <div class="flex flex-col">
                         <span>address</span>
@@ -69,6 +73,7 @@ function submit() {
                             placeholder="Enter the address"
                             class="w-full h-[2rem] rounded-md text-sm"
                         />
+                        <InputError class="mt-2" :message="form.errors.address" />
                     </div>
                     <div class="w-full flex justify-center items-center mt-4">
                         <button

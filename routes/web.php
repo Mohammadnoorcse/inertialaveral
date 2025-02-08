@@ -1,10 +1,10 @@
 <?php
 
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Application;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -25,16 +25,20 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// page 
-Route::get("/student", [StudentController::class, 'index'])->name('student.index');
-Route::get("/create", [StudentController::class, 'create'])->name('student.create');
+// page
+
+Route::resource("/student", StudentController::class);
+
+
+// Route::get("/student", [StudentController::class, 'index'])->name('student.index');
+// Route::get("/create", [StudentController::class, 'create'])->name('student.create');
 
 
 
-//api
-Route::post("/create", [StudentController::class, 'store']);
-Route::get("/student/{id}", [StudentController::class, 'show'])->name('student.show');
-Route::delete('/student/{id}', [StudentController::class, 'destroy'])->name('student.destroy');
-Route::put('/student/{id}', [StudentController::class, 'update'])->name('student.update');
+// //api
+// Route::post("/create", [StudentController::class, 'store']);
+// Route::get("/student/{id}", [StudentController::class, 'show'])->name('student.show');
+// Route::delete('/student/{id}', [StudentController::class, 'destroy'])->name('student.destroy');
+// Route::put('/student/{id}', [StudentController::class, 'update'])->name('student.update');
 
 require __DIR__ . '/auth.php';

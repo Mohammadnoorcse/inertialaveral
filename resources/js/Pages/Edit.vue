@@ -25,6 +25,7 @@ watchEffect(() => {
 });
 
 function submit() {
+    // router.put(route("student.update", props.student.id), form);
     router.put(route("student.update", props.student.id), form);
 }
 

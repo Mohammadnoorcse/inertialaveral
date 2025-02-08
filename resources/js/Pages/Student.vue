@@ -1,9 +1,12 @@
 <script setup>
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { Head } from '@inertiajs/vue3';
 import { Link, router } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
 const props = defineProps({
     students: Object,
-    flash: String, // Receive success message
+    flash: String,
+    searchQuery: String
 });
 
 const successMessage = ref(props.flash);
@@ -16,12 +19,31 @@ const deleteStudent = (id) => {
         },
     });
 };
+
+
+
+const goToPage = (page) => {
+    console.table(props);
+    if (page < 1 || page > props.students.last_page) return;
+    router.get(route("student.index"), { page: page }, { preserveState: true });
+};
+
+const search = ref(props.searchQuery || "");
+
+const handleSearch = () => {
+    router.get(route("student.index"), { search: search.value }, { preserveState: true });
+};
+
+
+
 </script>
 
 <template>
-    <div class="student">
-        <div class="content">
-            <div class="main">
+<Head title="Student" />
+<AuthenticatedLayout>
+    <div class="w-full h-screen bg-[#0f172a] flex items-center justify-center">
+        <div class="w-2/3 h-2/3 bg-[aliceblue] rounded-md p-4">
+            <div class="w-full h-full flex flex-col gap-4">
                 <!-- Success Message -->
                 <div
                     v-if="successMessage"
@@ -29,16 +51,19 @@ const deleteStudent = (id) => {
                 >
                     {{ successMessage }}
                 </div>
+
                 <!-- header -->
-                <div class="header-item border-b border-red-800">
-                    <div class="searching">
-                        <form action="">
-                            <input type="text" placeholder="searching" />
-                            <button>search</button>
+                <div class="w-full h-[4rem] flex justify-end items-center gap-4 border-b border-red-800">
+                    <div class="w-[16rem] h-[2rem] flex items-center bg-[#1f2937] rounded-md">
+                        <form action="" @submit.prevent="handleSearch" class="w-full h-full flex items-center">
+                            <input v-model="search" type="text" placeholder="searching" class="w-[80%] h-full bg-[#1f2937] text-white placeholder:text-gray-400 rounded-tl-md px-3 outline-none focus:ring-0"/>
+                            <button class="text-sm text-gray-400 cursor-pointer">search</button>
                         </form>
+
+
                     </div>
                     <div class="create-button">
-                        <Link :href="route('student.create')">Create</Link>
+                        <Link :href="route('student.create')" class="py-[0.4rem] px-[1.5rem] bg-[#1f2937] text-white rounded-md">Create</Link>
                     </div>
                 </div>
                 <!-- table -->
@@ -57,7 +82,7 @@ const deleteStudent = (id) => {
                         </thead>
                         <tbody>
                             <tr
-                                v-for="(item, index) in props.students"
+                                v-for="(item, index) in props.students?.data"
                                 :key="index"
                                 class="odd:bg-[#BCCCDC]"
                             >
@@ -109,81 +134,33 @@ const deleteStudent = (id) => {
                         </tbody>
                     </table>
                 </div>
+
+                 <!-- Pagination Controls -->
+                 <div class="pagination flex justify-center items-center gap-2 my-4">
+                    <button
+                        v-if="props.students.current_page > 1"
+                        @click="goToPage(props.students.current_page - 1)"
+                        class="px-4 py-1 bg-gray-700 text-white rounded"
+                    >
+                        Previous
+                    </button>
+
+                    <span class="text-gray-800">
+                        Page {{ props.students.current_page }} of {{ props.students.last_page }}
+                    </span>
+
+                    <button
+                        v-if="props.students.current_page < props.students.last_page"
+                        @click="goToPage(props.students.current_page + 1)"
+                        class="px-4 py-1 bg-gray-700 text-white rounded"
+                    >
+                        Next
+                    </button>
+                </div>
             </div>
         </div>
     </div>
+</AuthenticatedLayout>
 </template>
 
-<style>
-.student {
-    width: 100vw;
-    height: 100vh;
-    background: #0f172a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 
-.content {
-    width: 70rem;
-    height: 50rem;
-    background-color: aliceblue;
-    border-radius: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.main {
-    width: 68rem;
-    height: 48rem;
-    background-color: white;
-    border-radius: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-.header-item {
-    width: 100%;
-    height: 4rem;
-    display: flex;
-    justify-content: end;
-    align-items: center;
-    gap: 1rem;
-}
-.searching {
-    width: 16rem;
-    height: 2rem;
-    display: flex;
-    align-items: center;
-    background: #1f2937;
-    border-radius: 5px;
-}
-.searching form {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-}
-.searching form input {
-    width: 85%;
-    height: 100%;
-    outline: none !important;
-    border: none !important;
-    background: #1f2937;
-    border-radius: 5px;
-    font-size: 14px;
-    color: white;
-}
-.searching form button {
-    color: gray;
-    font-size: 14px;
-    padding-right: 5px;
-}
-.create-button a {
-    padding: 0.4rem 1.5rem;
-    background-color: #1f2937;
-    color: white;
-    border-radius: 5px;
-}
-</style>
